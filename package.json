@@ -1,17 +1,28 @@
 {
   "name": "pose-coach",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
   "description": "Pose Coach — real-time photography direction and dotted pose guidance",
-  "engines": { "node": ">=22.22.2", "npm": ">=10" },
   "scripts": {
-    "dev": "vite",
-    "server": "tsx server/main.ts",
-    "build": "vite build",
-    "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "vercel-build": "node scripts/unpack-project.mjs && npm run typecheck && npm run build"
+    "typecheck": "tsc --noEmit",
+    "seeds": "tsx eval/seed-sheet.ts",
+    "eval": "tsx eval/run.ts",
+    "eval:mock": "tsx eval/run.ts --mock",
+    "server": "tsx server/main.ts",
+    "dev": "vite",
+    "build": "vite build",
+    "start": "npm run build && npm run server",
+    "smoke": "tsx scripts/smoke.ts",
+    "cf:login": "npx wrangler@latest login",
+    "cf:d1:create": "npx wrangler@latest d1 create pose-coach-limits",
+    "cf:d1:migrate": "npx wrangler@latest d1 execute pose-coach-limits --remote --file=./migrations/0001_request_limits.sql",
+    "cf:dev": "npm run build && npx wrangler@latest dev",
+    "cf:deploy": "npm run build && npx wrangler@latest deploy",
+    "vercel-build": "node scripts/unpack-project.mjs && npm run typecheck && npm run build",
+    "dev:vercel": "vercel dev",
+    "test:ci": "vitest run --reporter=dot"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",
@@ -36,5 +47,9 @@
     "vite": "^8.3.8",
     "vite-plugin-pwa": "^2.0.0",
     "vitest": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=22.22.2",
+    "npm": ">=10"
   }
 }
