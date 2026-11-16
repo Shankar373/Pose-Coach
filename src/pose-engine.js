@@ -1,6 +1,177 @@
-export const CROPS=[{id:"4:5",label:"4:5",width:4,height:5,note:"Portrait"},{id:"3:4",label:"3:4",width:3,height:4,note:"Classic"},{id:"9:16",label:"9:16",width:9,height:16,note:"Story"},{id:"1:1",label:"1:1",width:1,height:1,note:"Square"}];
-export const POSES=[{id:"easy",name:"The easy stand",category:"EVERYDAY",description:"Let one knee soften, shift a little weight into the back foot, and keep your shoulders loose."},{id:"walk",name:"A step in motion",category:"CANDID",description:"Take a slow step toward the camera. Let your hands move naturally rather than arranging them."},{id:"profile",name:"The quiet profile",category:"EDITORIAL",description:"Turn your body three-quarters away, then bring your eyes back toward the light."},{id:"sit",name:"The relaxed sit",category:"RELAXED",description:"Sit near the front edge, angle your knees slightly, and lengthen your back without stiffening."},{id:"lean",name:"The soft lean",category:"EDITORIAL",description:"Rest one shoulder lightly against a wall. Keep a small gap between your arms and waist."},{id:"hands",name:"Hands at ease",category:"DETAIL",description:"Give your hands a simple job: hold a bag, touch a cuff, or brush a strand of hair."},{id:"lookback",name:"The look back",category:"CANDID",description:"Turn away from the camera and glance back over one shoulder. Keep the turn gentle."},{id:"grounded",name:"Grounded and calm",category:"PORTRAIT",description:"Stand evenly, lengthen through the crown of your head, and let your arms fall naturally."}];
-const JOINTS=[0,11,12,13,14,15,16,23,24,25,26,27,28,29,30,31,32];
-const CHAINS=[[0,11,23,25,27],[0,12,24,26,28],[11,12],[11,13,15],[12,14,16],[23,24],[23,24,26,28],[23,24,25,27]];
-export function makeDots(landmarks){if(!Array.isArray(landmarks)||landmarks.length<33)return[];const dots=[];for(const chain of CHAINS){for(let part=0;part<chain.length-1;part++){const a=landmarks[chain[part]],b=landmarks[chain[part+1]];if(!a||!b||(a.visibility??1)<.35||(b.visibility??1)<.35)continue;const count=Math.max(2,Math.round(Math.hypot(b.x-a.x,b.y-a.y)/.014));for(let i=0;i<=count;i++){const t=i/count;dots.push({x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,alpha:Math.min(a.visibility??1,b.visibility??1)});}}}for(const index of JOINTS){const p=landmarks[index];if(p&&(p.visibility??1)>=.4)dots.push({x:p.x,y:p.y,alpha:p.visibility??1,joint:true});}return dots;}
-export function assessFrame(landmarks,mode="subject"){if(!Array.isArray(landmarks)||landmarks.length<29)return{tracking:false,ready:false,title:"Find your place in the frame",detail:"Step into view so the guide can see your outline.",score:0};const required=[0,11,12,23,24,25,26,27,28],visible=required.map(i=>landmarks[i]).filter(p=>p&&(p.visibility??1)>.5);if(visible.length<7)return{tracking:false,ready:false,title:"Finding your outline",detail:"Try facing the camera and keeping your shoulders and hips visible.",score:Math.round(visible.length/required.length*100)};const head=landmarks[0],shoulder=(landmarks[11].x+landmarks[12].x)/2,hip=(landmarks[23].x+landmarks[24].x)/2,anklesY=Math.max(landmarks[27].y,landmarks[28].y),left=Math.min(...[11,12,23,24,27,28].map(i=>landmarks[i].x)),right=Math.max(...[11,12,23,24,27,28].map(i=>landmarks[i].x)),center=(shoulder+hip)/2,headCut=head.y<.07,feetCut=anklesY>.94,tooClose=anklesY-head.y<.56,tooWide=right-left>.84,offCenter=center<.37||center>.63,ready=!(headCut||feetCut||tooClose||tooWide||offCenter);let title="Lovely. Hold that.",detail=mode==="photographer"?"Keep a little breathing room above the head and below the feet.":"Soften your shoulders and stay in the light for one more beat.";if(headCut){title=mode==="photographer"?"Give the frame more headroom":"Take a small step back";detail="The top of the frame is too close to your head. Leave a little breathing room.";}else if(feetCut){title=mode==="photographer"?"Keep the feet in frame":"Take a small step back";detail="The lower edge is clipping your feet. Give the camera a little more space.";}else if(tooClose){title="Create a little more space";detail=mode==="photographer"?"Move the camera back to include the full silhouette.":"Step back until your full outline has room.";}else if(tooWide){title="Leave room at the sides";detail="A little negative space will make the composition feel calmer.";}else if(offCenter){title=center<.37?"Shift a little to your right":"Shift a little to your left";detail=mode==="photographer"?"Reposition the frame so the subject sits comfortably inside it.":"Move gently toward the middle of the frame.";}return{tracking:true,ready,title,detail,score:Math.round(visible.length/required.length*100)};}
+export const CROPS = [
+  { id: "4:5", label: "4:5", width: 4, height: 5, note: "Portrait" },
+  { id: "3:4", label: "3:4", width: 3, height: 4, note: "Classic" },
+  { id: "9:16", label: "9:16", width: 9, height: 16, note: "Story" },
+  { id: "1:1", label: "1:1", width: 1, height: 1, note: "Square" },
+];
+
+export const POSES = [
+  { id: "easy", name: "The easy stand", category: "EVERYDAY", description: "Let one knee soften, shift a little weight into the back foot, and keep your shoulders loose." },
+  { id: "walk", name: "A step in motion", category: "CANDID", description: "Take a slow step toward the camera. Let your hands move naturally rather than arranging them." },
+  { id: "profile", name: "The quiet profile", category: "EDITORIAL", description: "Turn your body three-quarters away, then bring your eyes back toward the light." },
+  { id: "sit", name: "The relaxed sit", category: "RELAXED", description: "Sit near the front edge, angle your knees slightly, and lengthen your back without stiffening." },
+  { id: "lean", name: "The soft lean", category: "EDITORIAL", description: "Rest one shoulder lightly against a wall. Keep a small gap between your arms and waist." },
+  { id: "hands", name: "Hands at ease", category: "DETAIL", description: "Give your hands a simple job: hold a bag, touch a cuff, or brush a strand of hair." },
+  { id: "lookback", name: "The look back", category: "CANDID", description: "Turn away from the camera and glance back over one shoulder. Keep the turn gentle." },
+  { id: "grounded", name: "Grounded and calm", category: "PORTRAIT", description: "Stand evenly, lengthen through the crown of your head, and let your arms fall naturally." },
+];
+
+const CORE_LANDMARKS = [0,  11, 12, 23, 24, 27, 28];
+const OPTIONAL_EDGE_LANDMARKS = [15, 16, 27, 28, 31, 32];
+
+export function getCropRect(stageWidth, stageHeight, aspectRatio) {
+  if (!stageWidth || !stageHeight || !aspectRatio || aspectRatio <= 0) {
+    return { left: 0.1, top: 0.05, width: 0.8, height: 0.9 };
+  }
+  // This mirrors the camera UI's crop frame: at most 82% of stage height
+  // and at most 80% of stage width, always centered.
+  const maxHeight = stageHeight * 0.82;
+  const maxWidth = stageWidth * 0.8;
+  const width = Math.min(maxWidth, maxHeight * aspectRatio);
+  const height = width / aspectRatio;
+  return {
+    left: (stageWidth - width) / (2 * stageWidth),
+    top: (stageHeight - height) / (2 * stageHeight),
+    width: width / stageWidth,
+    height: height / stageHeight,
+  };
+}
+
+export function createVideoToStageTransform(sourceWidth, sourceHeight, stageWidth, stageHeight, mirrored = true) {
+  if (![sourceWidth, sourceHeight, stageWidth, stageHeight].every(Number.isFinite) ||
+      sourceWidth <= 0 || sourceHeight <= 0 || stageWidth <= 0 || stageHeight <= 0) {
+    return { mapPoint: (point) => ({ x: point.x, y: point.y }) };
+  }
+
+  // Match object-fit: cover before applying the preview's horizontal mirror.
+  const scale = Math.max(stageWidth / sourceWidth, stageHeight / sourceHeight);
+  const renderedWidth = sourceWidth * scale;
+  const renderedHeight = sourceHeight * scale;
+  const offsetX = (stageWidth - renderedWidth) / 2;
+  const offsetY = (stageHeight - renderedHeight) / 2;
+
+  return {
+    scale,
+    offsetX,
+    offsetY,
+    renderedWidth,
+    renderedHeight,
+    mirrored,
+    mapPoint(point) {
+      const pixelX = point.x * renderedWidth + offsetX;
+      const pixelY = point.y * renderedHeight + offsetY;
+      return {
+        x: (mirrored ? stageWidth - pixelX : pixelX) / stageWidth,
+        y: pixelY / stageHeight,
+      };
+    },
+  };
+}
+
+export function mapLandmarksToStage(landmarks, transform) {
+  if (!Array.isArray(landmarks)) return null;
+  return landmarks.map((point) => {
+    if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) return point;
+    return { ...point, ...transform.mapPoint(point) };
+  });
+}
+
+function cropPoint(point, cropRect) {
+  return {
+    x: (point.x - cropRect.left) / cropRect.width,
+    y: (point.y - cropRect.top) / cropRect.height,
+  };
+}
+
+export function assessFrame(landmarks, cropRect, mode = "subject") {
+  if (!Array.isArray(landmarks) || landmarks.length < 29) {
+    return {
+      tracking: false, ready: false, title: "Step into the guide",
+      detail: "Stand far enough back for the camera to see your full body.", score: 0,
+    };
+  }
+
+  const visible = (index) => {
+    const point = landmarks[index];
+    return point && (point.visibility ?? 1) > 0.55 && Number.isFinite(point.x) && Number.isFinite(point.y);
+  };
+  const visibleCore = CORE_LANDMARKS.filter(visible);
+  const score = Math.round((visibleCore.length / CORE_LANDMARKS.length) * 100);
+  if (visibleCore.length < 6 || !visible(0) || !visible(11) || !visible(12) || !visible(23) || !visible(24)) {
+    return {
+      tracking: false, ready: false, title: "Finding your full outline",
+      detail: "Face the camera and make sure your head, shoulders and hips are visible.", score,
+    };
+  }
+
+  const rect = cropRect || { left: 0, top: 0, width: 1, height: 1 };
+  const local = {};
+  for (const index of [0, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28, 31, 32]) {
+    if (visible(index)) local[index] = cropPoint(landmarks[index], rect);
+  }
+
+  if (!visible(27) || !visible(28)) {
+    return {
+      tracking: true, ready: false, title: "Let the guide see your feet",
+      detail: mode === "photographer" ? "Reframe to include both feet before capturing." : "Take a small step back until both feet are visible.", score,
+    };
+  }
+
+  const head = local[0];
+  const shoulderCenter = (local[11].x + local[12].x) / 2;
+  const hipCenter = (local[23].x + local[24].x) / 2;
+  const centerX = (shoulderCenter + hipCenter) / 2;
+  const top = head.y;
+  const bottom = Math.max(local[27].y, local[28].y);
+  const bodyHeight = bottom - top;
+
+  const edgePoints = OPTIONAL_EDGE_LANDMARKS.filter((index) => local[index]);
+  const outerLeft = Math.min(
+    local[11].x, local[12].x, local[23].x, local[24].x,
+    ...edgePoints.map((index) => local[index].x),
+  );
+  const outerRight = Math.max(
+    local[11].x, local[12].x, local[23].x, local[24].x,
+    ...edgePoints.map((index) => local[index].x),
+  );
+
+  let title = "You're in the frame";
+  let detail = "Your position fits the guide. Relax your shoulders and take a breath.";
+  let ready = true;
+
+  if (top < 0.035) {
+    title = "Give your head a little room";
+    detail = mode === "photographer" ? "Tilt the camera slightly up to include more space above the head." : "Reframe slightly higher so there is a little space above your head.";
+    ready = false;
+  } else if (top > 0.19) {
+    title = "Move up into the guide";
+    detail = "Raise the camera framing slightly so your full silhouette sits comfortably in the guide.";
+    ready = false;
+  } else if (bottom > 0.985) {
+    title = "Keep both feet in the frame";
+    detail = mode === "photographer" ? "Tilt the camera slightly down to include the feet." : "Reframe slightly lower until both feet have a little breathing room.";
+    ready = false;
+  } else if (bottom < 0.76 || bodyHeight < 0.64) {
+    title = "Come a little closer";
+    detail = mode === "photographer" ? "Move the camera or subject closer so the person fills more of the guide." : "Take a small step toward the camera to fill the guide.";
+    ready = false;
+  } else if (bodyHeight > 0.96) {
+    title = "Create a little more space";
+    detail = mode === "photographer" ? "Move the camera back to leave room around the full body." : "Take a small step back so your full body fits comfortably.";
+    ready = false;
+  } else if (outerLeft < 0.015 || outerRight > 0.985) {
+    title = "Bring your outline inside the frame";
+    detail = "Keep your arms relaxed and leave a little space at both sides.";
+    ready = false;
+  } else if (centerX < 0.39 || centerX > 0.61) {
+    title = "Move toward the middle of the guide";
+    detail = mode === "photographer" ? "Reposition the camera or subject so the body sits in the center of the guide." : "Shift gently toward the center of the transparent outline.";
+    ready = false;
+  } else if (bodyHeight < 0.75) {
+    title = "Fill a little more of the guide";
+    detail = "Move a little closer while keeping your head and feet inside the frame.";
+    ready = false;
+  }
+
+  return { tracking: true, ready, title, detail, score };
+}
