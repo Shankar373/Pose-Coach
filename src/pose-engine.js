@@ -76,6 +76,37 @@ export function mapLandmarksToStage(landmarks, transform) {
   });
 }
 
+export function getSourceCropRect(stageRect, transform, sourceWidth, sourceHeight, stageWidth, stageHeight) {
+  if (!stageRect || !transform || !transform.scale ||
+      ![sourceWidth, sourceHeight, stageWidth, stageHeight].every(Number.isFinite)) {
+    return { x: 0, y: 0, width: sourceWidth, height: sourceHeight };
+  }
+
+  const leftPx = stageRect.left * stageWidth;
+  const rightPx = (stageRect.left + stageRect.width) * stageWidth;
+  const topPx = stageRect.top * stageHeight;
+  const bottomPx = (stageRect.top + stageRect.height) * stageHeight;
+
+  // Invert the exact cover-and-mirror transform used for the preview overlay.
+  const previewLeft = transform.mirrored ? stageWidth - rightPx : leftPx;
+  const previewRight = transform.mirrored ? stageWidth - leftPx : rightPx;
+  const x = (previewLeft - transform.offsetX) / transform.scale;
+  const y = (topPx - transform.offsetY) / transform.scale;
+  const right = (previewRight - transform.offsetX) / transform.scale;
+  const bottom = (bottomPx - transform.offsetY) / transform.scale;
+  const clampedX = Math.max(0, Math.min(sourceWidth, x));
+  const clampedY = Math.max(0, Math.min(sourceHeight, y));
+  const clampedRight = Math.max(clampedX, Math.min(sourceWidth, right));
+  const clampedBottom = Math.max(clampedY, Math.min(sourceHeight, bottom));
+
+  return {
+    x: clampedX,
+    y: clampedY,
+    width: clampedRight - clampedX,
+    height: clampedBottom - clampedY,
+  };
+}
+
 function cropPoint(point, cropRect) {
   return {
     x: (point.x - cropRect.left) / cropRect.width,
