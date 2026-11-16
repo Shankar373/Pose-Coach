@@ -6,15 +6,85 @@ export const CROPS = [
 ];
 
 export const POSES = [
-  { id: "easy", name: "The easy stand", category: "EVERYDAY", description: "Let one knee soften, shift a little weight into the back foot, and keep your shoulders loose." },
-  { id: "walk", name: "A step in motion", category: "CANDID", description: "Take a slow step toward the camera. Let your hands move naturally rather than arranging them." },
-  { id: "profile", name: "The quiet profile", category: "EDITORIAL", description: "Turn your body three-quarters away, then bring your eyes back toward the light." },
-  { id: "sit", name: "The relaxed sit", category: "RELAXED", description: "Sit near the front edge, angle your knees slightly, and lengthen your back without stiffening." },
-  { id: "lean", name: "The soft lean", category: "EDITORIAL", description: "Rest one shoulder lightly against a wall. Keep a small gap between your arms and waist." },
-  { id: "hands", name: "Hands at ease", category: "DETAIL", description: "Give your hands a simple job: hold a bag, touch a cuff, or brush a strand of hair." },
-  { id: "lookback", name: "The look back", category: "CANDID", description: "Turn away from the camera and glance back over one shoulder. Keep the turn gentle." },
-  { id: "grounded", name: "Grounded and calm", category: "PORTRAIT", description: "Stand evenly, lengthen through the crown of your head, and let your arms fall naturally." },
+  {
+    id: "easy", name: "The easy stand", category: "EVERYDAY",
+    description: "A relaxed starting point that moves from a soft stance into a more expressive portrait.",
+    phases: [
+      { title: "Find your base", action: "Stand softly", instruction: "Let your feet settle under your hips. Keep your knees unlocked and let your arms fall naturally.", guide: { head: 0, torso: 0, leftArm: 0, rightArm: 0, leftLeg: 0, rightLeg: 0 } },
+      { title: "Shift your weight", action: "Shift and soften", instruction: "Move your weight into one leg. Let the opposite knee bend slightly and allow your shoulders to follow.", guide: { head: -2, torso: -4, leftArm: 7, rightArm: -9, leftLeg: 9, rightLeg: -4 } },
+      { title: "Turn into the light", action: "Turn toward the light", instruction: "Rotate your shoulders a little, bring your chin toward the light and let one hand rest loosely by your side.", guide: { head: 13, torso: -9, leftArm: 2, rightArm: -17, leftLeg: 3, rightLeg: -3 } },
+    ],
+  },
+  {
+    id: "walk", name: "A step in motion", category: "CANDID",
+    description: "A three-beat walking sequence. Keep moving gently instead of freezing in one pose.",
+    phases: [
+      { title: "Prepare the step", action: "Prepare to move", instruction: "Place one foot slightly behind you. Let the opposite arm move forward; keep your shoulders loose.", guide: { head: 0, torso: -2, leftArm: -17, rightArm: 17, leftLeg: 12, rightLeg: -12 } },
+      { title: "Take the step", action: "Take one slow step", instruction: "Walk slowly toward the camera. Let your arms swing naturally in opposition to your legs.", guide: { head: 2, torso: 3, leftArm: 19, rightArm: -19, leftLeg: -16, rightLeg: 17 } },
+      { title: "Catch the pause", action: "Pause mid-movement", instruction: "Let your front foot land, soften the back knee and pause for a candid frame without stopping your breath.", guide: { head: 4, torso: 0, leftArm: 8, rightArm: -7, leftLeg: 5, rightLeg: -4 } },
+    ],
+  },
+  {
+    id: "profile", name: "The quiet profile", category: "EDITORIAL",
+    description: "Turn through a natural three-quarter angle, then bring your attention back to the camera.",
+    phases: [
+      { title: "Turn three-quarters", action: "Turn three-quarters", instruction: "Rotate your body away from the camera. Keep your feet grounded and let the shoulder nearest the camera move slightly forward.", guide: { head: -10, torso: -14, leftArm: -7, rightArm: 11, leftLeg: -5, rightLeg: 5 } },
+      { title: "Find the light", action: "Find the light", instruction: "Keep your body turned. Slowly bring your face toward the brightest soft light without lifting your chin too high.", guide: { head: 12, torso: -17, leftArm: -2, rightArm: 7, leftLeg: -4, rightLeg: 4 } },
+      { title: "Hold the profile", action: "Hold the profile", instruction: "Lengthen through the crown of your head, relax your hands and hold the angle for one calm frame.", guide: { head: 20, torso: -19, leftArm: -4, rightArm: 5, leftLeg: -3, rightLeg: 3 } },
+    ],
+  },
+  {
+    id: "sit", name: "The relaxed sit", category: "RELAXED",
+    description: "A seated sequence with a gentle leg angle and relaxed upper body.",
+    phases: [
+      { title: "Find your seat", action: "Sit near the edge", instruction: "Sit near the front edge of a bench or chair. Keep your back long and place both feet comfortably on the ground.", guide: { head: 0, torso: -3, leftArm: -8, rightArm: 8, leftLeg: 42, rightLeg: 52 } },
+      { title: "Angle your knees", action: "Angle your knees", instruction: "Turn both knees slightly to one side. Keep a little space between your feet and let your hands rest loosely.", guide: { head: 2, torso: -8, leftArm: -18, rightArm: 15, leftLeg: 58, rightLeg: 43 } },
+      { title: "Relax into the frame", action: "Relax into the frame", instruction: "Lean forward just a touch from your hips, soften your shoulders and look just past the camera.", guide: { head: 8, torso: -12, leftArm: -25, rightArm: 20, leftLeg: 52, rightLeg: 48 } },
+    ],
+  },
+  {
+    id: "lean", name: "The soft lean", category: "EDITORIAL",
+    description: "Use a wall or column as a light prop while the body moves through three easy positions.",
+    phases: [
+      { title: "Meet the wall", action: "Find a light lean", instruction: "Rest one shoulder lightly against the wall. Keep your weight mostly on your outside leg.", guide: { head: 0, torso: -10, leftArm: 20, rightArm: -5, leftLeg: 8, rightLeg: -4 } },
+      { title: "Create a line", action: "Create a long line", instruction: "Place one foot slightly forward and let the opposite hand rest near your pocket or hip.", guide: { head: -3, torso: -14, leftArm: 29, rightArm: -18, leftLeg: 13, rightLeg: -7 } },
+      { title: "Turn your face", action: "Turn toward the lens", instruction: "Keep the lean, turn your face toward the camera and relax the hand closest to the wall.", guide: { head: 15, torso: -9, leftArm: 18, rightArm: -8, leftLeg: 8, rightLeg: -4 } },
+    ],
+  },
+  {
+    id: "hands", name: "Hands at ease", category: "DETAIL",
+    description: "Give your hands a natural task, then change the hand position for a second frame.",
+    phases: [
+      { title: "Give one hand a place", action: "Rest one hand at your waist", instruction: "Rest one hand loosely near your waist or pocket. Keep the elbow soft rather than sharply pointed.", guide: { head: 0, torso: 0, leftArm: -34, rightArm: 5, leftLeg: 0, rightLeg: 0 } },
+      { title: "Add a small detail", action: "Touch a cuff or drape", instruction: "Let the other hand lightly touch a cuff, bag strap or saree drape. Avoid gripping the fabric.", guide: { head: 4, torso: -3, leftArm: -38, rightArm: 27, leftLeg: 2, rightLeg: -2 } },
+      { title: "Let the hands fall", action: "Release the hands", instruction: "Release both hands slowly and let them settle. Keep a little space between your arms and waist.", guide: { head: 0, torso: 2, leftArm: -12, rightArm: 13, leftLeg: 0, rightLeg: 0 } },
+    ],
+  },
+  {
+    id: "lookback", name: "The look back", category: "CANDID",
+    description: "A small turn into a glance over the shoulder, designed to feel caught rather than staged.",
+    phases: [
+      { title: "Turn away", action: "Turn away from camera", instruction: "Turn your shoulders away from the lens. Keep your feet steady and let your arms follow naturally.", guide: { head: -8, torso: -17, leftArm: -5, rightArm: 8, leftLeg: -4, rightLeg: 4 } },
+      { title: "Look back", action: "Look back over a shoulder", instruction: "Bring your gaze back over the shoulder closest to the light. Keep your chin level and your neck relaxed.", guide: { head: 26, torso: -19, leftArm: -4, rightArm: 8, leftLeg: -4, rightLeg: 4 } },
+      { title: "Hold the glance", action: "Hold the glance", instruction: "Pause for a beat, soften your eyes and let the rest of your body stay turned away.", guide: { head: 34, torso: -17, leftArm: -7, rightArm: 9, leftLeg: -4, rightLeg: 4 } },
+    ],
+  },
+  {
+    id: "grounded", name: "Grounded and calm", category: "PORTRAIT",
+    description: "A confident stance that opens through the feet, shoulders and hands.",
+    phases: [
+      { title: "Set your stance", action: "Set your feet", instruction: "Place your feet a little wider than your hips. Keep your weight balanced instead of locking your knees.", guide: { head: 0, torso: 0, leftArm: 0, rightArm: 0, leftLeg: 13, rightLeg: -13 } },
+      { title: "Open the shoulders", action: "Open your shoulders", instruction: "Let your shoulders settle back and down. Keep your chest open without pushing it forward.", guide: { head: -2, torso: 3, leftArm: 8, rightArm: -8, leftLeg: 17, rightLeg: -17 } },
+      { title: "Finish with ease", action: "Finish with ease", instruction: "Shift gently into one hip, let one hand move naturally and look toward the camera.", guide: { head: 12, torso: -4, leftArm: 3, rightArm: -13, leftLeg: 10, rightLeg: -6 } },
+    ],
+  },
 ];
+
+export function getPosePhase(poseId, phaseIndex = 0) {
+  const pose = POSES.find((item) => item.id === poseId) || POSES[0];
+  const phases = pose.phases || [];
+  return phases.length ? phases[((phaseIndex % phases.length) + phases.length) % phases.length] : null;
+}
 
 const CORE_LANDMARKS = [0,  11, 12, 23, 24, 27, 28];
 const OPTIONAL_EDGE_LANDMARKS = [15, 16, 27, 28, 31, 32];
