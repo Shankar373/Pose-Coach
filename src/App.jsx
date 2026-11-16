@@ -77,6 +77,9 @@ export default function App() {
   const raf = useRef(0);
   const lastTime = useRef(-1);
   const lastUpdate = useRef(0);
+  const countdownTimer = useRef(0);
+  const photoUrl = useRef("");
+  const feedbackRef = useRef(null);
 
   const [camera, setCamera] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -89,8 +92,13 @@ export default function App() {
   const [crop, setCrop] = useState("4:5");
   const [guideOpacity, setGuideOpacity] = useState(64);
   const [shot, setShot] = useState(false);
+  const [selfTimer, setSelfTimer] = useState("3");
+  const [countdown, setCountdown] = useState(0);
+  const [capturedPhoto, setCapturedPhoto] = useState("");
+  const [captureMessage, setCaptureMessage] = useState("");
   const [stageSize, setStageSize] = useState({ width: 1000, height: 750 });
   const [feedback, setFeedback] = useState(initialFeedback);
+  feedbackRef.current = feedback;
 
   const selected = useMemo(() => POSES.find((item) => item.id === pose) || POSES[0], [pose]);
   const ratio = useMemo(() => CROPS.find((item) => item.id === crop) || CROPS[0], [crop]);
@@ -130,12 +138,19 @@ export default function App() {
 
   const stop = useCallback(() => {
     cancelAnimationFrame(raf.current);
+    if (countdownTimer.current) {
+      window.clearInterval(countdownTimer.current);
+      countdownTimer.current = 0;
+    }
+    setCountdown(0);
     video.current?.srcObject?.getTracks?.().forEach((track) => track.stop());
     if (video.current) video.current.srcObject = null;
     landmarker.current?.close?.();
     landmarker.current = null;
     setCamera(false);
     setVision("idle");
+    setCapturedPhoto("");
+    setShot(false);
     setFeedback({
       tracking: false,
       ready: false,
@@ -148,6 +163,8 @@ export default function App() {
   const start = useCallback(async () => {
     setError("");
     setShot(false);
+    setCaptureMessage("");
+    setCountdown(0);
     if (!navigator.mediaDevices?.getUserMedia) {
       setError("Camera access needs a secure browser context. Open this page over HTTPS and try again.");
       return;
@@ -282,12 +299,14 @@ export default function App() {
 
   useEffect(() => () => {
     cancelAnimationFrame(raf.current);
+    if (countdownTimer.current) window.clearInterval(countdownTimer.current);
     video.current?.srcObject?.getTracks?.().forEach((track) => track.stop());
     landmarker.current?.close?.();
+    if (photoUrl.current) URL.revokeObjectURL(photoUrl.current);
   }, []);
 
   const capture = () => {
-    if (!video.current || !canvas.current || !feedback.ready) return;
+    if (!video.current || !canvas.current || !feedbackRef.current?.ready) return;
     const cameraVideo = video.current;
     const output = canvas.current;
     const outputRatio = ratio.width / ratio.height;
@@ -329,15 +348,51 @@ export default function App() {
     context.restore();
 
     output.toBlob((blob) => {
-      if (!blob) return;
+      if (!blob) {
+        setCaptureMessage("The photo could not be prepared. Please try again.");
+        return;
+      }
+      if (photoUrl.current) URL.revokeObjectURL(photoUrl.current);
       const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = "pose-coach-photo.jpg";
-      anchor.click();
-      window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+      photoUrl.current = url;
+      setCapturedPhoto(url);
       setShot(true);
+      setCaptureMessage("");
     }, "image/jpeg", 0.94);
+  };
+
+  const beginCapture = () => {
+    if (!feedbackRef.current?.ready || countdownTimer.current) return;
+    const seconds = Number(selfTimer);
+    if (seconds <= 0) {
+      capture();
+      return;
+    }
+    setCaptureMessage("");
+    setCountdown(seconds);
+    let remaining = seconds;
+    countdownTimer.current = window.setInterval(() => {
+      remaining -= 1;
+      if (remaining <= 0) {
+        window.clearInterval(countdownTimer.current);
+        countdownTimer.current = 0;
+        setCountdown(0);
+        if (feedbackRef.current?.ready) {
+          capture();
+        } else {
+          setCaptureMessage("Your framing moved. Line up with the guide and try again.");
+        }
+        return;
+      }
+      setCountdown(remaining);
+    }, 1000);
+  };
+
+  const closePhotoReview = () => {
+    if (photoUrl.current) URL.revokeObjectURL(photoUrl.current);
+    photoUrl.current = "";
+    setCapturedPhoto("");
+    setShot(false);
   };
 
   const outfitCue = outfit === "Saree"
@@ -402,6 +457,13 @@ export default function App() {
                 <span className="guide-label">ALIGN WITH THE GUIDE</span>
               </div>
 
+              {countdown > 0 && (
+                <div className="capture-countdown" aria-live="assertive" aria-label={`Taking photo in ${countdown} seconds`}>
+                  {countdown}
+                  <small>GET INTO POSITION</small>
+                </div>
+              )}
+
               <div className="stage-meta">
                 <span>{camera ? "LIVE / LOCAL CAMERA" : "NO UPLOADS. JUST YOU."}</span>
                 <span>{crop} CROP</span>
@@ -448,10 +510,50 @@ export default function App() {
                   <span>VISIBILITY</span>
                 </div>
               )}
-              {feedback.ready && <button className="capture-button" onClick={capture}>Capture <b>↗</b></button>}
+              {camera && (
+                <div className="capture-actions">
+                  <label className="self-timer-control">
+                    <span>SELF TIMER</span>
+                    <select value={selfTimer} onChange={(event) => setSelfTimer(event.target.value)} disabled={countdown > 0}>
+                      <option value="0">Off</option>
+                      <option value="3">3 sec</option>
+                      <option value="5">5 sec</option>
+                      <option value="10">10 sec</option>
+                    </select>
+                  </label>
+                  <button
+                    className="capture-button"
+                    onClick={beginCapture}
+                    disabled={!feedback.ready || countdown > 0}
+                    aria-label={feedback.ready ? "Take photo" : "Align with the guide before taking a photo"}
+                  >
+                    <span className="shutter-mark" />
+                    {countdown > 0 ? `Taking in ${countdown}` : feedback.ready ? "Take photo" : "Align to take photo"}
+                  </button>
+                </div>
+              )}
             </div>
-            {shot && <p className="capture-note" role="status">Your photo was downloaded from this browser.</p>}
+            {captureMessage && <p className="capture-note capture-warning" role="status">{captureMessage}</p>}
+            {shot && <p className="capture-note" role="status">Your photo is ready to review. Download it or retake it.</p>}
             <canvas ref={canvas} className="hidden-canvas" />
+
+            {capturedPhoto && (
+              <div className="photo-review-backdrop" role="presentation">
+                <section className="photo-review" role="dialog" aria-modal="true" aria-labelledby="photo-review-title">
+                  <div className="photo-review-heading">
+                    <span className="micro-label">YOUR PHOTO / {crop}</span>
+                    <button className="review-close" onClick={closePhotoReview} aria-label="Close photo review">×</button>
+                  </div>
+                  <h3 id="photo-review-title">A moment, just like that.</h3>
+                  <img src={capturedPhoto} alt="Your photo captured with Pose Coach" />
+                  <p>Your photo is saved locally in this browser session. Nothing is uploaded.</p>
+                  <div className="photo-review-actions">
+                    <button className="review-retake" onClick={closePhotoReview}>Retake photo</button>
+                    <a className="review-download" href={capturedPhoto} download={`pose-coach-${crop.replace(":", "-")}.jpg`}>Download photo ↗</a>
+                  </div>
+                </section>
+              </div>
+            )}
           </div>
 
           <aside className="studio-side">
