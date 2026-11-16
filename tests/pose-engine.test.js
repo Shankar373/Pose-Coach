@@ -97,6 +97,16 @@ test("source photo crop is the inverse of the visible mirrored composition guide
   assert.ok(Math.abs(rightStageEdge.x - (guide.left + guide.width)) < 1e-9);
 });
 
+test("rear-camera composition mapping remains unmirrored", () => {
+  const transform = createVideoToStageTransform(1280, 720, 400, 500, false);
+  const guide = getCropRect(400, 500, 4 / 5);
+  const sourceCrop = getSourceCropRect(guide, transform, 1280, 720, 400, 500);
+  const sourceLeft = transform.mapPoint({ x: sourceCrop.x / 1280, y: 0.5 });
+  const sourceRight = transform.mapPoint({ x: (sourceCrop.x + sourceCrop.width) / 1280, y: 0.5 });
+  assert.ok(Math.abs(sourceLeft.x - guide.left) < 1e-9);
+  assert.ok(Math.abs(sourceRight.x - (guide.left + guide.width)) < 1e-9);
+});
+
 test("a visibly tilted shoulder line requests a gentle camera-level adjustment", () => {
   const landmarks = sample(standardCrop);
   landmarks[12].y += standardCrop.height * 0.12;
