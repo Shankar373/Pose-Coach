@@ -5,6 +5,7 @@ import {
   assessFrame,
   createVideoToStageTransform,
   getCropRect,
+  getSourceCropRect,
   mapLandmarksToStage,
 } from "./pose-engine.js";
 
@@ -145,6 +146,10 @@ export default function App() {
     setCountdown(0);
     video.current?.srcObject?.getTracks?.().forEach((track) => track.stop());
     if (video.current) video.current.srcObject = null;
+    if (photoUrl.current) {
+      URL.revokeObjectURL(photoUrl.current);
+      photoUrl.current = "";
+    }
     landmarker.current?.close?.();
     landmarker.current = null;
     setCamera(false);
@@ -310,18 +315,24 @@ export default function App() {
     const cameraVideo = video.current;
     const output = canvas.current;
     const outputRatio = ratio.width / ratio.height;
-    const sourceRatio = cameraVideo.videoWidth / cameraVideo.videoHeight;
-    let sourceX = 0;
-    let sourceY = 0;
-    let sourceWidth = cameraVideo.videoWidth;
-    let sourceHeight = cameraVideo.videoHeight;
-
-    if (sourceRatio > outputRatio) {
-      sourceWidth = sourceHeight * outputRatio;
-      sourceX = (cameraVideo.videoWidth - sourceWidth) / 2;
-    } else {
-      sourceHeight = sourceWidth / outputRatio;
-      sourceY = (cameraVideo.videoHeight - sourceHeight) / 2;
+    const transform = createVideoToStageTransform(
+      cameraVideo.videoWidth,
+      cameraVideo.videoHeight,
+      stageSize.width,
+      stageSize.height,
+      true,
+    );
+    const sourceCrop = getSourceCropRect(
+      cropRect,
+      transform,
+      cameraVideo.videoWidth,
+      cameraVideo.videoHeight,
+      stageSize.width,
+      stageSize.height,
+    );
+    if (sourceCrop.width < 2 || sourceCrop.height < 2) {
+      setCaptureMessage("The camera frame is not ready yet. Please try again.");
+      return;
     }
 
     output.width = 1200;
@@ -336,10 +347,10 @@ export default function App() {
     context.scale(-1, 1);
     context.drawImage(
       cameraVideo,
-      sourceX,
-      sourceY,
-      sourceWidth,
-      sourceHeight,
+      sourceCrop.x,
+      sourceCrop.y,
+      sourceCrop.width,
+      sourceCrop.height,
       0,
       0,
       output.width,
