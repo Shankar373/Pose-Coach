@@ -286,3 +286,36 @@ export function assessFrame(landmarks, cropRect, mode = "subject") {
 
   return { tracking: true, ready, title, detail, score };
 }
+
+
+const PLACE_POSE_ORDER = {
+  "Open space": ["easy", "grounded", "walk", "lookback", "profile"],
+  "Steps / stairs": ["sit", "walk", "grounded", "lookback"],
+  "Garden": ["walk", "lookback", "profile", "easy"],
+  "Wall / architecture": ["lean", "profile", "hands", "lookback"],
+  "Bench / seating": ["sit", "hands", "lookback", "easy"],
+  "Railing / balcony": ["lean", "profile", "lookback", "grounded"],
+  "Monument / architecture": ["grounded", "profile", "walk", "lookback"],
+};
+
+const OUTFIT_POSE_ORDER = {
+  Everyday: ["easy", "walk", "grounded", "lookback"],
+  Saree: ["profile", "hands", "lookback", "grounded"],
+  Dress: ["walk", "profile", "lookback", "sit"],
+  Jacket: ["lean", "grounded", "hands", "profile"],
+};
+
+/**
+ * Deterministic context-aware pose rotation. It combines location and outfit
+ * preferences, removes duplicates, and returns the next distinct pose.
+ */
+export function getNextRecommendedPose(outfit = "Everyday", place = "Open space", currentPoseId = "easy") {
+  const order = [
+    ...(PLACE_POSE_ORDER[place] || PLACE_POSE_ORDER["Open space"]),
+    ...(OUTFIT_POSE_ORDER[outfit] || OUTFIT_POSE_ORDER.Everyday),
+    ...POSES.map((item) => item.id),
+  ].filter((id, index, all) => all.indexOf(id) === index);
+  const currentIndex = order.indexOf(currentPoseId);
+  const nextId = order[(currentIndex + 1 + order.length) % order.length];
+  return POSES.find((item) => item.id === nextId) || POSES[0];
+}
