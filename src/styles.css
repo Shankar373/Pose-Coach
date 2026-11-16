@@ -370,3 +370,117 @@
     stroke-dasharray: .01 8;
   }
 }
+
+
+/* Three-beat pose direction: calm controls, clear sequence hierarchy. */
+.reference-silhouette .guide-part {
+  transform-box: view-box;
+  transition: transform .82s cubic-bezier(.2,.72,.18,1), stroke .3s ease;
+  transform-origin: center;
+  will-change: transform;
+}
+.reference-silhouette .silhouette-body {
+  fill: rgba(255,255,255,.025) !important;
+  stroke: rgba(255,255,255,.96);
+  stroke-width: 3;
+  stroke-dasharray: .01 8.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.camera-stage:not(.is-live) .reference-silhouette .silhouette-body {
+  fill: rgba(92,83,68,.018) !important;
+  stroke: rgba(92,83,68,.9);
+}
+.pose-sequence {
+  margin-top: 15px;
+  padding-top: 13px;
+  border-top: 1px solid rgba(120,115,101,.22);
+}
+.sequence-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #8a887d;
+  font: 8px var(--mono);
+  letter-spacing: .12em;
+}
+.sequence-progress {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  margin: 9px 0 13px;
+}
+.sequence-progress span {
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(121,116,103,.2);
+  transition: background .25s ease;
+}
+.sequence-progress span.complete,
+.sequence-progress span.current {
+  background: var(--clay);
+}
+.pose-sequence > strong {
+  display: block;
+  margin: 0 0 5px;
+  color: var(--ink);
+  font: 18px/1.2 var(--serif);
+  letter-spacing: -.02em;
+}
+.pose-sequence .sequence-instruction {
+  margin: 0;
+  color: #65665d;
+  font: 12px/1.55 "DM Sans", sans-serif;
+}
+.sequence-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.sequence-actions button {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid rgba(120,115,101,.32);
+  border-radius: 20px;
+  background: transparent;
+  color: #56574e;
+  font: 9px "DM Sans", sans-serif;
+  cursor: pointer;
+  transition: background .2s ease, border-color .2s ease, color .2s ease;
+}
+.sequence-actions button:nth-child(2) {
+  border-color: var(--clay);
+  background: var(--clay);
+  color: #fff;
+}
+.sequence-actions button.playing {
+  border-color: #6e7958;
+  background: #6e7958;
+  color: #fff;
+}
+.sequence-actions button:focus-visible,
+.pose-option:focus-visible {
+  outline: 2px solid var(--clay);
+  outline-offset: 3px;
+}
+@media(max-width:620px) {
+  .reference-silhouette .guide-part {
+    transition-duration: .68s;
+  }
+  .sequence-actions {
+    gap: 5px;
+  }
+  .sequence-actions button {
+    min-height: 38px;
+    padding: 0 9px;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .reference-silhouette .guide-part,
+  .sequence-progress span,
+  .sequence-actions button {
+    transition: none;
+    will-change: auto;
+  }
+}
