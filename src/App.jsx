@@ -83,6 +83,8 @@ export default function App() {
   const feedbackRef = useRef(null);
 
   const [camera, setCamera] = useState(false);
+  const [facingMode, setFacingMode] = useState("user");
+  const [cameraSwitchPending, setCameraSwitchPending] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [vision, setVision] = useState("idle");
@@ -180,7 +182,7 @@ export default function App() {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: false,
         video: {
-          facingMode: "user",
+          facingMode: { ideal: facingMode },
           width: { ideal: 1280 },
           height: { ideal: 720 },
         },
@@ -244,7 +246,20 @@ export default function App() {
     } finally {
       setBusy(false);
     }
-  }, []);
+  }, [facingMode]);
+
+  useEffect(() => {
+    if (!cameraSwitchPending) return;
+    setCameraSwitchPending(false);
+    start();
+  }, [cameraSwitchPending, start]);
+
+  const switchCamera = () => {
+    if (!camera || busy) return;
+    setFacingMode((current) => current === "user" ? "environment" : "user");
+    setCameraSwitchPending(true);
+    stop();
+  };
 
   useEffect(() => {
     if (!camera || vision !== "ready" || !landmarker.current || !video.current) return undefined;
@@ -371,12 +386,14 @@ export default function App() {
       setCaptureMessage("");
     }, "image/jpeg", 0.94);
   };
+  const captureRef = useRef(null);
+  captureRef.current = capture;
 
   const beginCapture = () => {
     if (!feedbackRef.current?.ready || countdownTimer.current) return;
     const seconds = Number(selfTimer);
     if (seconds <= 0) {
-      capture();
+      captureRef.current?.();
       return;
     }
     setCaptureMessage("");
@@ -389,7 +406,7 @@ export default function App() {
         countdownTimer.current = 0;
         setCountdown(0);
         if (feedbackRef.current?.ready) {
-          capture();
+          captureRef.current?.();
         } else {
           setCaptureMessage("Your framing moved. Line up with the guide and try again.");
         }
@@ -486,7 +503,12 @@ export default function App() {
                     {busy ? "Opening camera…" : "Open camera"} <b>↗</b>
                   </button>
                 ) : (
-                  <button className="button button-light" onClick={stop}>Pause camera <b>Ⅱ</b></button>
+                  <div className="camera-stage-actions">
+                    <button className="camera-switch-button" onClick={switchCamera} disabled={busy}>
+                      {facingMode === "user" ? "Use rear camera ↗" : "Use front camera ↗"}
+                    </button>
+                    <button className="button button-light" onClick={stop}>Pause camera <b>Ⅱ</b></button>
+                  </div>
                 )}
                 <label className="opacity-control">
                   <span>GUIDE</span>
