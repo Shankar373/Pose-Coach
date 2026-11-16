@@ -484,3 +484,29 @@
     will-change: auto;
   }
 }
+
+
+.context-pose-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 39px;
+  margin-top: 9px;
+  border: 1px solid rgba(160,103,77,.48);
+  border-radius: 22px;
+  background: rgba(160,103,77,.07);
+  color: #8d5943;
+  font: 10px "DM Sans", sans-serif;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.context-pose-button:hover {
+  border-color: var(--clay);
+  background: var(--clay);
+  color: #fff;
+}
+.context-pose-button:focus-visible {
+  outline: 2px solid var(--clay);
+  outline-offset: 3px;
+}
