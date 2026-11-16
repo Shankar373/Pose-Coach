@@ -304,3 +304,41 @@
   .capture-countdown { animation: none; }
   .capture-button { transition: none; }
 }
+
+
+/* Front camera uses a mirror preview; rear camera remains true-to-scene. */
+.camera-feed {
+  transform: none;
+}
+.camera-feed-mirrored {
+  transform: scaleX(-1);
+}
+.camera-stage-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.camera-switch-button {
+  min-height: 42px;
+  padding: 0 13px;
+  border: 1px solid rgba(255,255,255,.55);
+  border-radius: 24px;
+  background: rgba(30,32,27,.34);
+  color: #fff;
+  font-size: 10px;
+  backdrop-filter: blur(8px);
+}
+.camera-switch-button:disabled {
+  opacity: .5;
+  cursor: wait;
+}
+@media(max-width:620px) {
+  .camera-stage-actions {
+    gap: 6px;
+  }
+  .camera-switch-button {
+    min-height: 40px;
+    padding: 0 10px;
+    font-size: 9px;
+  }
+}
