@@ -310,12 +310,13 @@ const OUTFIT_POSE_ORDER = {
  * preferences, removes duplicates, and returns the next distinct pose.
  */
 export function getNextRecommendedPose(outfit = "Everyday", place = "Open space", currentPoseId = "easy") {
-  const order = [
+  const contextualOrder = [
     ...(PLACE_POSE_ORDER[place] || PLACE_POSE_ORDER["Open space"]),
     ...(OUTFIT_POSE_ORDER[outfit] || OUTFIT_POSE_ORDER.Everyday),
-    ...POSES.map((item) => item.id),
   ].filter((id, index, all) => all.indexOf(id) === index);
+  const order = contextualOrder.length ? contextualOrder : POSES.map((item) => item.id);
   const currentIndex = order.indexOf(currentPoseId);
-  const nextId = order[(currentIndex + 1 + order.length) % order.length];
+  const nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % order.length;
+  const nextId = order[nextIndex];
   return POSES.find((item) => item.id === nextId) || POSES[0];
 }
