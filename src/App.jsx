@@ -20,46 +20,45 @@ function Mark() {
  * A fixed visual reference. It is intentionally not derived from the person
  * in the camera: the person moves until their live image fits this guide.
  */
-function HumanGuide({ opacity = 48 }) {
+function guidePartStyle(degrees = 0, origin = "150px 380px") {
+  return {
+    transform: degrees ? `rotate(${degrees}deg)` : "none",
+    transformOrigin: origin,
+    transformBox: "view-box",
+  };
+}
+
+/**
+ * The reference is a moving pose director, not a single generic mannequin.
+ * Each phase changes the body-part positions with a soft transition while
+ * retaining the dotted full-body contour used by the camera guide.
+ */
+function HumanGuide({ opacity = 48, guide = {} }) {
   return (
     <svg
       className="reference-silhouette"
       viewBox="0 0 300 760"
       role="img"
-      aria-label="Transparent full-body standing position guide"
+      aria-label="Animated full-body pose reference"
       preserveAspectRatio="xMidYMid meet"
     >
-      <defs>
-        <filter id="guide-soft-edge" x="-20%" y="-10%" width="140%" height="120%">
-          <feGaussianBlur stdDeviation="2.2" />
-        </filter>
-      </defs>
       <g opacity={opacity / 100}>
-        <g className="silhouette-glow" fill="#fff" filter="url(#guide-soft-edge)">
-          <path d="M150 27 C119 27 98 52 98 87 C98 119 118 143 150 147 C182 143 202 119 202 87 C202 52 181 27 150 27Z" />
-          <path d="M128 132 C122 149 112 154 98 159 C82 165 75 180 69 199 L49 272 C45 287 50 306 60 323 L76 352 C82 363 95 363 102 355 C108 348 105 337 100 328 L89 300 L116 226 L121 315 C119 350 112 387 105 420 C102 437 113 450 130 452 L170 452 C187 450 198 437 195 420 C188 387 181 350 179 315 L184 226 L211 300 L200 328 C195 337 192 348 198 355 C205 363 218 363 224 352 L240 323 C250 306 255 287 251 272 L231 199 C225 180 218 165 202 159 C188 154 178 149 172 132Z" />
-          <path d="M111 416 C123 424 137 428 151 428 L147 462 C144 493 139 525 137 559 L132 678 C131 695 122 706 111 706 C100 706 93 695 93 678 L89 559 C87 522 91 485 98 454 C101 438 105 425 111 416Z" />
-          <path d="M189 416 C177 424 163 428 149 428 L153 462 C156 493 161 525 163 559 L168 678 C169 695 178 706 189 706 C200 706 207 695 207 678 L211 559 C213 522 209 485 202 454 C199 438 195 425 189 416Z" />
-          <path d="M93 674 C99 690 105 699 108 713 C110 726 100 738 83 740 L55 740 C45 740 42 733 47 725 C55 714 70 705 87 696Z" />
-          <path d="M207 674 C201 690 195 699 192 713 C190 726 200 738 217 740 L245 740 C255 740 258 733 253 725 C245 714 230 705 213 696Z" />
+        <g className="silhouette-body" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.94)" strokeWidth="2.8" strokeLinejoin="round" strokeLinecap="round">
+          <path className="guide-part guide-head" style={guidePartStyle(guide.head, "150px 87px")} d="M150 27 C119 27 98 52 98 87 C98 119 118 143 150 147 C182 143 202 119 202 87 C202 52 181 27 150 27Z" />
+          <path className="guide-part guide-neck" style={guidePartStyle(guide.torso, "150px 171px")} d="M128 132 C128 151 124 160 116 171 L184 171 C176 160 172 151 172 132Z" />
+          <path className="guide-part guide-arm-left" style={guidePartStyle(guide.leftArm, "116px 171px")} d="M116 157 C99 158 87 168 80 185 L52 273 C47 288 51 305 60 323 L76 352 C82 363 95 363 102 355 C108 348 105 337 100 328 L89 300 L117 225 L128 180Z" />
+          <path className="guide-part guide-arm-right" style={guidePartStyle(guide.rightArm, "184px 171px")} d="M184 157 C201 158 213 168 220 185 L248 273 C253 288 249 305 240 323 L224 352 C218 363 205 363 198 355 C192 348 195 337 200 328 L211 300 L183 225 L172 180Z" />
+          <path className="guide-part guide-torso" style={guidePartStyle(guide.torso, "150px 300px")} d="M116 157 C128 153 139 163 150 163 C161 163 172 153 184 157 C194 161 203 169 207 183 L184 226 L180 313 C179 350 186 388 194 420 C198 437 187 450 170 452 L130 452 C113 450 102 437 106 420 C114 388 121 350 120 313 L116 226 L93 183 C97 169 106 161 116 157Z" />
+          <path className="guide-part guide-leg-left" style={guidePartStyle(guide.leftLeg, "150px 428px")} d="M111 416 C123 424 137 428 151 428 L147 462 C144 493 139 525 137 559 L132 678 C131 695 122 706 111 706 C100 706 93 695 93 678 L89 559 C87 522 91 485 98 454 C101 438 105 425 111 416Z" />
+          <path className="guide-part guide-leg-right" style={guidePartStyle(guide.rightLeg, "150px 428px")} d="M189 416 C177 424 163 428 149 428 L153 462 C156 493 161 525 163 559 L168 678 C169 695 178 706 189 706 C200 706 207 695 207 678 L211 559 C213 522 209 485 202 454 C199 438 195 425 189 416Z" />
+          <path className="guide-part guide-foot-left" style={guidePartStyle(guide.leftLeg, "150px 428px")} d="M93 674 C99 690 105 699 108 713 C110 726 100 738 83 740 L55 740 C45 740 42 733 47 725 C55 714 70 705 87 696Z" />
+          <path className="guide-part guide-foot-right" style={guidePartStyle(guide.rightLeg, "150px 428px")} d="M207 674 C201 690 195 699 192 713 C190 726 200 738 217 740 L245 740 C255 740 258 733 253 725 C245 714 230 705 213 696Z" />
         </g>
-        <g className="silhouette-body" fill="rgba(255,255,255,.22)" stroke="rgba(255,255,255,.92)" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round">
-          <path d="M150 27 C119 27 98 52 98 87 C98 119 118 143 150 147 C182 143 202 119 202 87 C202 52 181 27 150 27Z" />
-          <path d="M128 132 C128 151 124 160 116 171 L184 171 C176 160 172 151 172 132Z" />
-          <path d="M116 157 C99 158 87 168 80 185 L52 273 C47 288 51 305 60 323 L76 352 C82 363 95 363 102 355 C108 348 105 337 100 328 L89 300 L117 225 L128 180Z" />
-          <path d="M184 157 C201 158 213 168 220 185 L248 273 C253 288 249 305 240 323 L224 352 C218 363 205 363 198 355 C192 348 195 337 200 328 L211 300 L183 225 L172 180Z" />
-          <path d="M116 157 C128 153 139 163 150 163 C161 163 172 153 184 157 C194 161 203 169 207 183 L184 226 L180 313 C179 350 186 388 194 420 C198 437 187 450 170 452 L130 452 C113 450 102 437 106 420 C114 388 121 350 120 313 L116 226 L93 183 C97 169 106 161 116 157Z" />
-          <path d="M111 416 C123 424 137 428 151 428 L147 462 C144 493 139 525 137 559 L132 678 C131 695 122 706 111 706 C100 706 93 695 93 678 L89 559 C87 522 91 485 98 454 C101 438 105 425 111 416Z" />
-          <path d="M189 416 C177 424 163 428 149 428 L153 462 C156 493 161 525 163 559 L168 678 C169 695 178 706 189 706 C200 706 207 695 207 678 L211 559 C213 522 209 485 202 454 C199 438 195 425 189 416Z" />
-          <path d="M93 674 C99 690 105 699 108 713 C110 726 100 738 83 740 L55 740 C45 740 42 733 47 725 C55 714 70 705 87 696Z" />
-          <path d="M207 674 C201 690 195 699 192 713 C190 726 200 738 217 740 L245 740 C255 740 258 733 253 725 C245 714 230 705 213 696Z" />
-        </g>
-        <path className="silhouette-center" d="M150 177 L150 413" fill="none" stroke="rgba(255,255,255,.24)" strokeWidth="1" strokeDasharray="3 9" />
+        <path className="silhouette-center" d="M150 177 L150 413" fill="none" stroke="rgba(255,255,255,.24)" strokeWidth="1" strokeDasharray="2 8" />
       </g>
     </svg>
   );
 }
-
 function initialFeedback() {
   return {
     tracking: false,
@@ -90,6 +89,8 @@ export default function App() {
   const [vision, setVision] = useState("idle");
   const [mode, setMode] = useState("subject");
   const [pose, setPose] = useState("easy");
+  const [posePhase, setPosePhase] = useState(0);
+  const [posePlaying, setPosePlaying] = useState(false);
   const [outfit, setOutfit] = useState("Everyday");
   const [place, setPlace] = useState("Open space");
   const [crop, setCrop] = useState("4:5");
@@ -104,6 +105,7 @@ export default function App() {
   feedbackRef.current = feedback;
 
   const selected = useMemo(() => POSES.find((item) => item.id === pose) || POSES[0], [pose]);
+  const selectedPhase = selected.phases?.[posePhase] || selected.phases?.[0];
   const ratio = useMemo(() => CROPS.find((item) => item.id === crop) || CROPS[0], [crop]);
   const cropRect = useMemo(
     () => getCropRect(stageSize.width, stageSize.height, ratio.width / ratio.height),
@@ -115,6 +117,16 @@ export default function App() {
     width: `${cropRect.width * 100}%`,
     height: `${cropRect.height * 100}%`,
   }), [cropRect]);
+
+  // Hands-free sequence playback: the guide moves through the selected pose's
+  // three directions, then loops until the photographer pauses it.
+  useEffect(() => {
+    if (!posePlaying || !selected.phases?.length) return undefined;
+    const timer = window.setInterval(() => {
+      setPosePhase((current) => (current + 1) % selected.phases.length);
+    }, 3000);
+    return () => window.clearInterval(timer);
+  }, [posePlaying, selected]);
 
   useEffect(() => {
     const element = stage.current;
@@ -492,8 +504,8 @@ export default function App() {
               )}
 
               <div className="stage-crop" style={cropStyle}>
-                <HumanGuide opacity={guideOpacity} />
-                <span className="guide-label">ALIGN WITH THE GUIDE</span>
+                <HumanGuide opacity={guideOpacity} guide={selectedPhase?.guide} />
+                <span className="guide-label">{selectedPhase?.action?.toUpperCase() || "ALIGN WITH THE GUIDE"}</span>
               </div>
 
               {countdown > 0 && (
@@ -627,7 +639,7 @@ export default function App() {
                   <button
                     key={item.id}
                     className={`pose-option ${pose === item.id ? "selected" : ""}`}
-                    onClick={() => setPose(item.id)}
+                    onClick={() => { setPose(item.id); setPosePhase(0); setPosePlaying(false); }}
                   >
                     <span className="pose-number">0{index + 1}</span>
                     <span className="pose-name">{item.name}<small>{item.category}</small></span>
@@ -636,8 +648,28 @@ export default function App() {
                 ))}
               </div>
               <div className="pose-detail">
-                <span className="micro-label">A SMALL THOUGHT</span>
+                <span className="micro-label">THE MOVEMENT</span>
                 <p>{selected.description}</p>
+                {selectedPhase && (
+                  <div className="pose-sequence" aria-live="polite">
+                    <div className="sequence-heading">
+                      <span>POSE FLOW</span>
+                      <span>{String(posePhase + 1).padStart(2, "0")} / {String(selected.phases.length).padStart(2, "0")}</span>
+                    </div>
+                    <div className="sequence-progress" aria-label={`Movement ${posePhase + 1} of ${selected.phases.length}`}>
+                      {selected.phases.map((phase, index) => (
+                        <span key={phase.title} className={index === posePhase ? "current" : index < posePhase ? "complete" : ""} />
+                      ))}
+                    </div>
+                    <strong>{selectedPhase.title}</strong>
+                    <p className="sequence-instruction">{selectedPhase.instruction}</p>
+                    <div className="sequence-actions">
+                      <button type="button" onClick={() => setPosePhase((current) => (current + selected.phases.length - 1) % selected.phases.length)}>Previous</button>
+                      <button type="button" onClick={() => setPosePhase((current) => (current + 1) % selected.phases.length)}>Next movement ↗</button>
+                      <button type="button" className={posePlaying ? "playing" : ""} onClick={() => setPosePlaying((value) => !value)}>{posePlaying ? "Pause flow Ⅱ" : "Play flow ▶"}</button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
