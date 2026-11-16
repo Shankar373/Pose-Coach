@@ -5,6 +5,7 @@ import {
   assessFrame,
   createVideoToStageTransform,
   getCropRect,
+  getNextRecommendedPose,
   getSourceCropRect,
   mapLandmarksToStage,
 } from "./pose-engine.js";
@@ -450,12 +451,25 @@ export default function App() {
         : "Choose one relaxed hand position and let the rest of the pose breathe.";
 
   const placeCue = place === "Steps / stairs"
-    ? "Use the step edge as a leading line; keep both feet visible."
+    ? "Use the step edge as a leading line; alternate a seated pause with a slow step."
     : place === "Garden"
-      ? "Find a patch of even light and keep bright details behind you simple."
+      ? "Find a patch of even light; use a slow walk or a look-back to bring the background into the frame."
       : place === "Wall / architecture"
-        ? "Leave a little distance from the wall to create depth."
-        : "Look for open light and enough space around your outline.";
+        ? "Leave a little distance from the wall; let one shoulder or hand make a relaxed point of contact."
+        : place === "Bench / seating"
+          ? "Use the edge of the seat. Angle your knees, change your hand position and leave a little room around your feet."
+          : place === "Railing / balcony"
+            ? "Rest fingertips lightly on the rail, then turn your shoulders toward the open view."
+            : place === "Monument / architecture"
+              ? "Use the architecture as a strong vertical line; try a grounded stance, then a slow three-quarter turn."
+              : "Look for open light and enough space around your outline.";
+
+  const generateNextPose = () => {
+    const next = getNextRecommendedPose(outfit, place, pose);
+    setPose(next.id);
+    setPosePhase(0);
+    setPosePlaying(false);
+  };
 
   return (
     <div className="app-shell">
@@ -668,6 +682,9 @@ export default function App() {
                       <button type="button" onClick={() => setPosePhase((current) => (current + 1) % selected.phases.length)}>Next movement ↗</button>
                       <button type="button" className={posePlaying ? "playing" : ""} onClick={() => setPosePlaying((value) => !value)}>{posePlaying ? "Pause flow Ⅱ" : "Play flow ▶"}</button>
                     </div>
+                    <button type="button" className="context-pose-button" onClick={generateNextPose}>
+                      Find a pose for this setting ↗
+                    </button>
                   </div>
                 )}
               </div>
@@ -684,7 +701,7 @@ export default function App() {
               <label className="field-label">
                 Where are you?
                 <select value={place} onChange={(event) => setPlace(event.target.value)}>
-                  <option>Open space</option><option>Steps / stairs</option><option>Garden</option><option>Wall / architecture</option>
+                  <option>Open space</option><option>Steps / stairs</option><option>Garden</option><option>Wall / architecture</option><option>Bench / seating</option><option>Railing / balcony</option><option>Monument / architecture</option>
                 </select>
               </label>
               <div className="context-note">
