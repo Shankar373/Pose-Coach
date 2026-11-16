@@ -159,13 +159,13 @@ export function assessFrame(landmarks, cropRect, mode = "subject") {
     title = "Create a little more space";
     detail = mode === "photographer" ? "Move the camera back to leave room around the full body." : "Take a small step back so your full body fits comfortably.";
     ready = false;
-  } else if (outerLeft < 0.015 || outerRight > 0.985) {
-    title = "Bring your outline inside the frame";
-    detail = "Keep your arms relaxed and leave a little space at both sides.";
-    ready = false;
   } else if (centerX < 0.39 || centerX > 0.61) {
     title = "Move toward the middle of the guide";
     detail = mode === "photographer" ? "Reposition the camera or subject so the body sits in the center of the guide." : "Shift gently toward the center of the transparent outline.";
+    ready = false;
+  } else if (outerLeft < 0.015 || outerRight > 0.985) {
+    title = "Bring your outline inside the frame";
+    detail = "Keep your arms relaxed and leave a little space at both sides.";
     ready = false;
   } else if (bodyHeight < 0.75) {
     title = "Fill a little more of the guide";
