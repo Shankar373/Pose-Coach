@@ -124,6 +124,12 @@ export function assessFrame(landmarks, cropRect, mode = "subject") {
   const top = head.y;
   const bottom = Math.max(local[27].y, local[28].y);
   const bodyHeight = bottom - top;
+  const shoulderTilt = Math.abs(
+    Math.atan2(
+      local[12].y - local[11].y,
+      Math.max(0.0001, Math.abs(local[12].x - local[11].x)),
+    ) * (180 / Math.PI),
+  );
 
   const edgePoints = OPTIONAL_EDGE_LANDMARKS.filter((index) => local[index]);
   const outerLeft = Math.min(
@@ -139,7 +145,11 @@ export function assessFrame(landmarks, cropRect, mode = "subject") {
   let detail = "Your position fits the guide. Relax your shoulders and take a breath.";
   let ready = true;
 
-  if (top < 0.035) {
+  if (shoulderTilt > 12) {
+    title = "Level the camera";
+    detail = "Your shoulder line looks tilted. Straighten the phone slightly, then relax your shoulders.";
+    ready = false;
+  } else if (top < 0.035) {
     title = "Give your head a little room";
     detail = mode === "photographer" ? "Tilt the camera slightly up to include more space above the head." : "Reframe slightly higher so there is a little space above your head.";
     ready = false;
