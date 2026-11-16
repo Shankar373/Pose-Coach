@@ -6,6 +6,7 @@ import {
   assessFrame,
   createVideoToStageTransform,
   getCropRect,
+  getSourceCropRect,
   mapLandmarksToStage,
 } from "../src/pose-engine.js";
 
@@ -67,6 +68,41 @@ test("landmark mapping preserves confidence while transforming coordinates", () 
   const mapped = mapLandmarksToStage([{ x: 0.4, y: 0.5, visibility: 0.9 }], transform);
   assert.equal(mapped[0].visibility, 0.9);
   assert.ok(mapped[0].x > 0.5);
+});
+
+test("source photo crop is the inverse of the visible mirrored composition guide", () => {
+  const sourceWidth = 1280;
+  const sourceHeight = 720;
+  const stageWidth = 400;
+  const stageHeight = 500;
+  const transform = createVideoToStageTransform(sourceWidth, sourceHeight, stageWidth, stageHeight, true);
+  const guide = getCropRect(stageWidth, stageHeight, 4 / 5);
+  const sourceCrop = getSourceCropRect(
+    guide,
+    transform,
+    sourceWidth,
+    sourceHeight,
+    stageWidth,
+    stageHeight,
+  );
+
+  assert.ok(sourceCrop.x >= 0 && sourceCrop.y >= 0);
+  assert.ok(sourceCrop.x + sourceCrop.width <= sourceWidth + 1e-6);
+  assert.ok(sourceCrop.y + sourceCrop.height <= sourceHeight + 1e-6);
+  assert.ok(Math.abs(sourceCrop.width / sourceCrop.height - 4 / 5) < 1e-9);
+
+  const leftStageEdge = transform.mapPoint({ x: (sourceCrop.x + sourceCrop.width) / sourceWidth, y: 0.5 });
+  const rightStageEdge = transform.mapPoint({ x: sourceCrop.x / sourceWidth, y: 0.5 });
+  assert.ok(Math.abs(leftStageEdge.x - (guide.left + guide.width)) < 1e-9);
+  assert.ok(Math.abs(rightStageEdge.x - guide.left) < 1e-9);
+});
+
+test("a visibly tilted shoulder line requests a gentle camera-level adjustment", () => {
+  const landmarks = sample(standardCrop);
+  landmarks[12].y += standardCrop.height * 0.12;
+  const result = assessFrame(landmarks, standardCrop);
+  assert.equal(result.ready, false);
+  assert.match(result.title, /level/i);
 });
 
 test("full-body position aligned with the reference guide is capture-ready", () => {
