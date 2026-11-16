@@ -192,6 +192,10 @@ export default function App() {
         return;
       }
       video.current.srcObject = stream;
+      const actualFacingMode = stream.getVideoTracks()[0]?.getSettings?.().facingMode;
+      if (actualFacingMode === "user" || actualFacingMode === "environment") {
+        setFacingMode(actualFacingMode);
+      }
       await video.current.play();
       lastTime.current = -1;
       lastUpdate.current = 0;
@@ -291,7 +295,7 @@ export default function App() {
                 cameraVideo.videoHeight,
                 stageSize.width,
                 stageSize.height,
-                true,
+                facingMode === "user",
               );
               const stageLandmarks = mapLandmarksToStage(sourceLandmarks, transform);
               setFeedback(assessFrame(stageLandmarks, cropRect, mode));
@@ -335,7 +339,7 @@ export default function App() {
       cameraVideo.videoHeight,
       stageSize.width,
       stageSize.height,
-      true,
+      facingMode === "user",
     );
     const sourceCrop = getSourceCropRect(
       cropRect,
@@ -358,8 +362,10 @@ export default function App() {
     // Match the mirrored front-camera preview so the downloaded photo matches
     // the composition the person saw while aligning with the reference.
     context.save();
-    context.translate(output.width, 0);
-    context.scale(-1, 1);
+    if (facingMode === "user") {
+      context.translate(output.width, 0);
+      context.scale(-1, 1);
+    }
     context.drawImage(
       cameraVideo,
       sourceCrop.x,
@@ -469,7 +475,12 @@ export default function App() {
             </div>
 
             <div ref={stage} className={`camera-stage ${camera ? "is-live" : ""}`}>
-              <video ref={video} className="camera-feed" playsInline muted />
+              <video
+                ref={video}
+                className={`camera-feed ${facingMode === "user" ? "camera-feed-mirrored" : ""}`}
+                playsInline
+                muted
+              />
               {!camera && (
                 <div className="stage-poster">
                   <div className="poster-caption">
