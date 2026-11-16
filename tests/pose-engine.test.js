@@ -6,6 +6,7 @@ import {
   assessFrame,
   createVideoToStageTransform,
   getCropRect,
+  getPosePhase,
   getSourceCropRect,
   mapLandmarksToStage,
 } from "../src/pose-engine.js";
@@ -40,6 +41,28 @@ const standardCrop = getCropRect(1000, 750, 4 / 5);
 test("eight curated poses and four crop presets remain available", () => {
   assert.equal(POSES.length, 8);
   assert.deepEqual(CROPS.map((crop) => crop.id), ["4:5", "3:4", "9:16", "1:1"]);
+});
+
+test("every pose is a three-beat movement sequence with animated guide targets", () => {
+  assert.equal(POSES.length, 8);
+  for (const pose of POSES) {
+    assert.equal(pose.phases.length, 3, `${pose.id} should provide three movement phases`);
+    for (const phase of pose.phases) {
+      assert.ok(phase.title.length > 0);
+      assert.ok(phase.action.length > 0);
+      assert.ok(phase.instruction.length > 0);
+      for (const part of ["head", "torso", "leftArm", "rightArm", "leftLeg", "rightLeg"]) {
+        assert.equal(typeof phase.guide[part], "number", `${pose.id}/${phase.title} needs a numeric ${part} transform`);
+        assert.ok(Math.abs(phase.guide[part]) <= 60, `${pose.id}/${phase.title} transform should remain within a safe visual range`);
+      }
+    }
+  }
+});
+
+test("pose phase selection wraps around and falls back to the default pose", () => {
+  assert.equal(getPosePhase("walk", 0).title, "Prepare the step");
+  assert.equal(getPosePhase("walk", 3).title, "Prepare the step");
+  assert.equal(getPosePhase("unknown-pose", 0).title, "Find your base");
 });
 
 test("crop frame is centered and preserves each selected aspect ratio", () => {
