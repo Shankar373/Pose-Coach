@@ -93,8 +93,8 @@ test("source photo crop is the inverse of the visible mirrored composition guide
 
   const leftStageEdge = transform.mapPoint({ x: (sourceCrop.x + sourceCrop.width) / sourceWidth, y: 0.5 });
   const rightStageEdge = transform.mapPoint({ x: sourceCrop.x / sourceWidth, y: 0.5 });
-  assert.ok(Math.abs(leftStageEdge.x - (guide.left + guide.width)) < 1e-9);
-  assert.ok(Math.abs(rightStageEdge.x - guide.left) < 1e-9);
+  assert.ok(Math.abs(leftStageEdge.x - guide.left) < 1e-9);
+  assert.ok(Math.abs(rightStageEdge.x - (guide.left + guide.width)) < 1e-9);
 });
 
 test("a visibly tilted shoulder line requests a gentle camera-level adjustment", () => {
