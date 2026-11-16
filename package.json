@@ -1,0 +1,40 @@
+{
+  "name": "pose-coach",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Pose Coach — real-time photography direction and dotted pose guidance",
+  "engines": { "node": ">=22.22.2", "npm": ">=10" },
+  "scripts": {
+    "dev": "vite",
+    "server": "tsx server/main.ts",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "vercel-build": "node scripts/unpack-project.mjs && npm run typecheck && npm run build"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
+    "@hono/node-server": "^2.1.8",
+    "@resvg/resvg-js": "^2.6.2",
+    "hono": "^4.13.18",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "@vitest/coverage-v8": "^5.1.0",
+    "jsdom": "^31.0.1",
+    "playwright-core": "^1.65.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.1.0"
+  }
+}
