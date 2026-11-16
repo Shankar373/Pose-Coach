@@ -7,6 +7,7 @@ import {
   createVideoToStageTransform,
   getCropRect,
   getPosePhase,
+  getNextRecommendedPose,
   getSourceCropRect,
   mapLandmarksToStage,
 } from "../src/pose-engine.js";
@@ -172,4 +173,11 @@ test("landmarks with insufficient body visibility cannot pass the shutter gate",
     landmarks[index].visibility = 0.1;
   }
   assert.equal(assessFrame(landmarks, standardCrop).ready, false);
+});
+
+test("context-based pose generation changes direction for outfit and location", () => {
+  assert.equal(getNextRecommendedPose("Saree", "Wall / architecture", "easy").id, "lean");
+  assert.equal(getNextRecommendedPose("Saree", "Garden", "walk").id, "lookback");
+  assert.equal(getNextRecommendedPose("Jacket", "Railing / balcony", "lean").id, "profile");
+  assert.notEqual(getNextRecommendedPose("Dress", "Steps / stairs", "sit").id, "sit");
 });
